@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  username  String
+  firstname String     @map("first_name")
+  lastname  String     @map("last_name")
+  age       Int
+  phone     String
+  address   String
+  email     String     @unique
+  password  String
+  Rent      Rent[]
+  Reveiws   Reveiws[]
+  Shipping  Shipping[]
+
+  @@map("user")
+}
+
+enum Status {
+  Done
+  Pending
+  Ongoing
+  Cancelled
+}
+
+model Rent {
+  id       Int        @id @default(autoincrement())
+  user     User       @relation(fields: [userId], references: [id])
+  camera   Camera     @relation(fields: [cameraId], references: [id])
+  rentDate DateTime   @map("rent_date") @db.Date
+  status   Status
+  userId   Int
+  Reveiws  Reveiws[]
+  Payment  Payment[]
+  Shipping Shipping[]
+  cameraId Int
+
+  @@map("rent")
+}
+
+model Camera {
+  id         Int    @id @default(autoincrement())
+  cameraName String
+  cameraType String
+  price      String
+  Rent       Rent[]
+
+  @@map("camera")
+}
+
+model Shipping {
+  id      Int    @id @default(autoincrement())
+  user    User   @relation(fields: [userId], references: [id])
+  rent    Rent   @relation(fields: [rentId], references: [id])
+  phone   String @unique
+  address String @unique
+  rentId  Int
+  userId  Int
+
+  @@map("shipping")
+}
+
+model Payment {
+  id            Int      @id @default(autoincrement())
+  rent          Rent     @relation(fields: [rentId], references: [id])
+  paymentDate   DateTime
+  paymentAmount String
+  rentId        Int
+
+  @@map("payment")
+}
+
+model Reveiws {
+  id      Int    @id @default(autoincrement())
+  user    User   @relation(fields: [userId], references: [id])
+  rent    Rent   @relation(fields: [rentId], references: [id])
+  comment String
+  userId  Int
+  rentId  Int
+
+  @@map("reveiw")
+}
